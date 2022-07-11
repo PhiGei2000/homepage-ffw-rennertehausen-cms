@@ -26,13 +26,43 @@ class ServerData extends ChangeNotifier {
     notifyListeners();
   }
 
-  final List<Alarm> _alarms = [];
+  final Map<String, Alarm> _alarms = <String, Alarm>{};
+  bool _alarmsChanged = false;
+  List<String> _changedAlarms = [];
 
   void addAlarm(Alarm alarm) {
-    _alarms.add(alarm);
+    final id = alarm.id;
+
+    if (_alarms.containsKey(id)) {
+      final oldValue = _alarms[id]!;
+
+      if (!alarm.hasChanges(oldValue)) {
+        return;
+      } else {
+        _alarmsChanged = true;
+        if (!_changedAlarms.contains(id)) {
+          _changedAlarms.add(id);
+        }
+      }
+    }
+
+    _alarms[id] = alarm;
 
     notifyListeners();
   }
 
-  UnmodifiableListView<Alarm> get alarms => UnmodifiableListView(_alarms);
+  UnmodifiableMapView<String, Alarm> get alarms => UnmodifiableMapView(_alarms);
+  UnmodifiableListView<String> get changedAlarms =>
+      UnmodifiableListView(_changedAlarms);
+
+  void syncAlarms() async {
+    await _client.uploadAlarms(List.from(_alarms.values));
+
+    log("Alarms synced");
+
+    _alarmsChanged = false;
+    _changedAlarms.clear();
+
+    notifyListeners();
+  }
 }

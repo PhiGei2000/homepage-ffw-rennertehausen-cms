@@ -6,7 +6,7 @@ class AlarmDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var alarmIndex = (ModalRoute.of(context)!.settings.arguments as int);
+    var alarmIndex = (ModalRoute.of(context)!.settings.arguments as String);
 
     return Scaffold(
       appBar: AppBar(title: const Text("Einsatz bearbeiten")),

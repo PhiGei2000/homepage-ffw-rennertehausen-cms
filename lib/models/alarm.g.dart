@@ -20,11 +20,11 @@ Alarm _$AlarmFromJson(Map<String, dynamic> json) => Alarm(
 
 Map<String, dynamic> _$AlarmToJson(Alarm instance) => <String, dynamic>{
       'id': instance.id,
-      'location': instance.location,
-      'time': Alarm._timeToJson(instance.time),
       'title': instance.title,
-      'vehicles': instance.vehicles,
       'word': instance.word,
+      'time': Alarm._timeToJson(instance.time),
+      'location': instance.location,
+      'vehicles': instance.vehicles,
       'participants': instance.participants,
       'description': instance.description,
       'image': instance.image,

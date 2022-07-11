@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -49,5 +50,11 @@ class Client {
     for (final alarm in alarms) {
       data.addAlarm(Alarm.fromJson(alarm));
     }
+  }
+
+  Future<void> uploadAlarms(List<Alarm> alarms) async {
+    var alarmsData = jsonEncode(alarms);
+
+    log(alarmsData);
   }
 }

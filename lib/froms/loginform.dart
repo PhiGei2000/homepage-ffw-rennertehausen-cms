@@ -9,9 +9,7 @@ class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
 
   @override
-  State<StatefulWidget> createState() {
-    return LoginFormState();
-  }
+  State<StatefulWidget> createState() => LoginFormState();
 }
 
 class LoginFormState extends State<LoginForm> {
@@ -30,6 +28,14 @@ class LoginFormState extends State<LoginForm> {
     super.initState();
 
     loadSettings();
+  }
+
+  @override
+  void dispose() {
+    _hostController.dispose();
+    _usernameController.dispose();
+
+    super.dispose();
   }
 
   void loadSettings() async {

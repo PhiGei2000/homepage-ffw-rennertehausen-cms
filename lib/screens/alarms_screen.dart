@@ -15,6 +15,11 @@ class AlarmsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Einsätze bearbeiten"),
+        actions: [
+          IconButton(
+              onPressed: () => syncButtonPressed(context),
+              icon: Icon(Icons.sync))
+        ],
       ),
       body: Container(
         padding: const EdgeInsets.all(8.0),
@@ -41,23 +46,35 @@ class AlarmsScreen extends StatelessWidget {
             const Text("Einsätze", style: TextStyle(fontSize: 24)),
             Expanded(
               child: ListView.builder(
-                itemCount: data.alarms.length,
-                scrollDirection: Axis.vertical,
-                itemBuilder: (_, index) => Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: Card(
-                    child: ListTile(
-                      key: Key(data.alarms[index].id),
-                      title: Text(data.alarms[index].id),
-                      subtitle: Text(data.alarms[index].word),
-                      onTap: () {
-                        Navigator.pushNamed(context, "/alarmDetail",
-                            arguments: index);
-                      },
-                    ),
-                  ),
-                ),
-              ),
+                  itemCount: data.alarms.length,
+                  scrollDirection: Axis.vertical,
+                  itemBuilder: (_, index) {
+                    final alarmId = data.alarms.keys.elementAt(index);
+
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Card(
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: ListTile(
+                                key: Key(alarmId),
+                                title: Text(data.alarms[alarmId]!.title),
+                                subtitle: Text(data.alarms[alarmId]!.word),
+                                onTap: () {
+                                  Navigator.pushNamed(context, "/alarmDetail",
+                                      arguments: alarmId);
+                                },
+                                trailing: data.changedAlarms.contains(alarmId)
+                                    ? const Icon(Icons.cached)
+                                    : null,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }),
             ),
           ],
         ),
@@ -68,4 +85,8 @@ class AlarmsScreen extends StatelessWidget {
   }
 
   void addButtonPressed() {}
+
+  void syncButtonPressed(BuildContext context) async {
+    Provider.of<ServerData>(context, listen: false).syncAlarms();
+  }
 }

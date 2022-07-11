@@ -5,18 +5,25 @@ part 'alarm.g.dart';
 
 @JsonSerializable()
 class Alarm {
+  Alarm.createNew(this.id)
+      : title = "",
+        word = "",
+        time = DateTime.now(),
+        location = "",
+        description = "";
+
   Alarm(this.id, this.location, this.time, this.title, this.vehicles, this.word,
       this.participants, this.description, this.image);
 
   String id;
-  String location;
+  String title;
+  String word;
 
   @JsonKey(toJson: _timeToJson)
   DateTime time;
-  String title;
+  String location;
 
   String? vehicles;
-  String word;
   int? participants;
   String description;
   String? image;
@@ -32,5 +39,20 @@ class Alarm {
     } else {
       return '';
     }
+  }
+
+  bool hasChanges(Alarm alarm) {
+    if (id != alarm.id) {
+      throw Exception("The given alarm has an other id!");
+    }
+
+    return title != alarm.title ||
+        word != alarm.word ||
+        time != alarm.time ||
+        location != alarm.location ||
+        vehicles != alarm.vehicles ||
+        participants != alarm.participants ||
+        description != alarm.description ||
+        image != alarm.image;
   }
 }

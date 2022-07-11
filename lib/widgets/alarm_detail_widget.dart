@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -8,19 +10,31 @@ import '../models/serverData.dart';
 
 class AlarmDetail extends StatefulWidget {
   final String? restorationId;
-  final int selectedIndex;
+  final String selectedIndex;
 
   AlarmDetail(this.restorationId, this.selectedIndex);
 
   @override
-  State<StatefulWidget> createState() => _AlarmDetailState();
+  State<StatefulWidget> createState() => AlarmDetailState();
 }
 
-class _AlarmDetailState extends State<AlarmDetail> with RestorationMixin {
+class AlarmDetailState extends State<AlarmDetail> with RestorationMixin {
+  static final DateFormat _dateFormatter = DateFormat();
+
+  final _formKey = GlobalKey<FormState>();
+  late Alarm _currentAlarm;
+
+  @override
+  void initState() {
+    super.initState();
+
+    setState(() {
+      _currentAlarm = Alarm.createNew(widget.selectedIndex);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    final DateFormat dateFormatter = DateFormat('dd.MM.yyyy HH:mm');
-
     final DateTime selectedDateTime = DateTime(
         _selectedDate.value.year,
         _selectedDate.value.month,
@@ -28,9 +42,16 @@ class _AlarmDetailState extends State<AlarmDetail> with RestorationMixin {
         _selectedTime.value.hour,
         _selectedTime.value.minute);
 
+    String? notEmptyValidator(String? value) {
+      if (value == null || value.isEmpty) {
+        return "Dieses Feld darf nicht leer sein!";
+      }
+      return null;
+    }
+
     return Consumer<ServerData>(
       builder: (context, data, child) {
-        var alarm = data.alarms[widget.selectedIndex];
+        Alarm? alarm = data.alarms[widget.selectedIndex]!;
 
         return Padding(
           padding: const EdgeInsets.all(16.0),
@@ -38,30 +59,113 @@ class _AlarmDetailState extends State<AlarmDetail> with RestorationMixin {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               Flexible(
-                flex: 2,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    createTextField("Id", alarm.id),
-                    createTextField("Titel", alarm.title),
-                    createTextField("Einsatzstichwort", alarm.word),
-                    createTextField("Einsatzort", alarm.location),
-                    createTextField(
-                      "Einsatzzeit",
-                      dateFormatter.format(alarm.time),
-                      onTap: () {
-                        FocusScope.of(context).requestFocus(new FocusNode());
-                        _restorableDatePickerRouteFuture.present();
-                      },
+                flex: 3,
+                child: Padding(
+                  padding: EdgeInsets.only(right: 8.0),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        createTextField(
+                          "Id",
+                          alarm.id,
+                          validator: (id) {
+                            if (!RegExp(r"^\d{4}_\d{2}$").hasMatch(id!)) {
+                              return "Falsches Format für die Einsatz ID";
+                            }
+
+                            return null;
+                          },
+                          onSaved: (id) => _currentAlarm.id = id!,
+                        ),
+                        createTextField(
+                          "Titel",
+                          alarm.title,
+                          validator: (title) {
+                            if (!RegExp(r"Einsatz \d{2}\/\d{4}")
+                                .hasMatch(title!)) {
+                              return "Flasches Format";
+                            }
+
+                            return null;
+                          },
+                          onSaved: (title) => _currentAlarm.title = title!,
+                        ),
+                        createTextField(
+                          "Einsatzstichwort",
+                          alarm.word,
+                          validator: notEmptyValidator,
+                          onSaved: (word) => _currentAlarm.word = word!,
+                        ),
+                        createTextField(
+                          "Einsatzort",
+                          alarm.location,
+                          validator: notEmptyValidator,
+                          onSaved: (location) =>
+                              _currentAlarm.location = location!,
+                        ),
+                        createTextField(
+                            "Einsatzzeit", _dateFormatter.format(alarm.time),
+                            onTap: () {
+                              FocusScope.of(context)
+                                  .requestFocus(new FocusNode());
+                              _restorableDatePickerRouteFuture.present();
+                            },
+                            validator: notEmptyValidator,
+                            onSaved: (timeString) {
+                              final time =
+                                  _dateFormatter.parseStrict(timeString!);
+                              _currentAlarm.time = time;
+                            }),
+                        createTextField(
+                          "Fahrzeuge",
+                          alarm.vehicles,
+                          onSaved: (vehicles) =>
+                              _currentAlarm.vehicles = vehicles,
+                        ),
+                        createTextField(
+                          "Einsatzkräfte",
+                          alarm.participants?.toString(),
+                          onSaved: (participants) =>
+                              _currentAlarm.participants =
+                                  participants != null && !participants.isEmpty
+                                      ? int.parse(participants)
+                                      : null,
+                        ),
+                        createTextField(
+                          "Beschreibung",
+                          alarm.description,
+                          maxLines: null,
+                          validator: notEmptyValidator,
+                          onSaved: (description) =>
+                              _currentAlarm.description = description!,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton(
+                              onPressed: () {
+                                _formKey.currentState!.save();
+
+                                data.addAlarm(_currentAlarm);
+                                Navigator.pop(context);
+                              },
+                              child: const Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Text("Übernehmen"),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    createTextField("Fahrzeuge", alarm.vehicles),
-                    createTextField(
-                        "Einsatzkräfte", alarm.participants.toString())
-                  ],
+                  ),
                 ),
               ),
               Flexible(
-                flex: 1,
+                flex: 2,
                 child: Column(children: [
                   Padding(
                       padding: EdgeInsets.all(10.0),
@@ -81,7 +185,8 @@ class _AlarmDetailState extends State<AlarmDetail> with RestorationMixin {
   TextFormField createTextField(String title, String? initialText,
           {void Function(String?)? onSaved,
           void Function()? onTap,
-          String? Function(String?)? validator}) =>
+          String? Function(String?)? validator,
+          int? maxLines = 1}) =>
       TextFormField(
         decoration: InputDecoration(
           labelText: title,
@@ -90,6 +195,7 @@ class _AlarmDetailState extends State<AlarmDetail> with RestorationMixin {
         onSaved: onSaved,
         onTap: onTap,
         validator: validator,
+        maxLines: maxLines,
       );
 
   final RestorableDateTime _selectedDate = RestorableDateTime(DateTime.now());
