@@ -11,19 +11,18 @@ void main() {
   runApp(
     ChangeNotifierProvider(
       create: (context) => ServerData(),
-      child: const MyApp(),
+      child: const FFWRennertehausenCMSApp(),
     ),
   );
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+class FFWRennertehausenCMSApp extends StatelessWidget {
+  const FFWRennertehausenCMSApp({Key? key}) : super(key: key);
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
       theme: ThemeData(
         primarySwatch: Colors.red,
       ),
