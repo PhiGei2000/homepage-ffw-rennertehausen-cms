@@ -102,7 +102,7 @@ class LoginFormState extends State<LoginForm> {
                                     Settings.setUsername(_username!);
                                   }
 
-                                  Navigator.popAndPushNamed(context, "/alarms");
+                                  Navigator.popAndPushNamed(context, "/");
                                 } else {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(

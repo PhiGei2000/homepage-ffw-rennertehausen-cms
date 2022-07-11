@@ -14,7 +14,7 @@ class AlarmsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Feuerwehr Rennertehausen"),
+        title: const Text("Einsätze bearbeiten"),
       ),
       body: Container(
         padding: const EdgeInsets.all(8.0),

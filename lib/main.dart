@@ -4,6 +4,7 @@ import 'package:homepage_ffw_rennertehausen_cms/models/serverData.dart';
 import 'package:homepage_ffw_rennertehausen_cms/screens/alarm_detail_screen.dart';
 import 'package:homepage_ffw_rennertehausen_cms/screens/alarms_screen.dart';
 import 'package:homepage_ffw_rennertehausen_cms/screens/login_screen.dart';
+import 'package:homepage_ffw_rennertehausen_cms/screens/overview_screen.dart';
 import 'package:homepage_ffw_rennertehausen_cms/widgets/alarm_detail_widget.dart';
 import 'package:provider/provider.dart';
 
@@ -28,8 +29,8 @@ class FFWRennertehausenCMSApp extends StatelessWidget {
       ),
       initialRoute: '/login',
       routes: {
+        '/': (context) => OverviewScreen(),
         '/login': (context) => LoginScreen(),
-        // '/': (context) => Overview(),
         '/alarms': (context) => AlarmsScreen('alarms_screen'),
         '/alarmDetail': (context) => AlarmDetailScreen(),
       },
