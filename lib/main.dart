@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:homepage_ffw_rennertehausen_cms/models/serverData.dart';
 import 'package:homepage_ffw_rennertehausen_cms/screens/alarm_detail_screen.dart';
 import 'package:homepage_ffw_rennertehausen_cms/screens/alarms_screen.dart';
+import 'package:homepage_ffw_rennertehausen_cms/screens/image_screen.dart';
 import 'package:homepage_ffw_rennertehausen_cms/screens/login_screen.dart';
 import 'package:homepage_ffw_rennertehausen_cms/screens/overview_screen.dart';
 import 'package:homepage_ffw_rennertehausen_cms/widgets/alarm_detail_widget.dart';
@@ -27,12 +28,22 @@ class FFWRennertehausenCMSApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.red,
       ),
-      initialRoute: '/login',
+      initialRoute: "/login",
       routes: {
-        '/': (context) => OverviewScreen(),
-        '/login': (context) => LoginScreen(),
-        '/alarms': (context) => AlarmsScreen('alarms_screen'),
-        '/alarmDetail': (context) => AlarmDetailScreen(),
+        "/": (context) => OverviewScreen(),
+        "/login": (context) => LoginScreen(),
+        "/alarms": (context) => AlarmsScreen("alarms_screen"),
+        "/alarmDetail": (context) => AlarmDetailScreen(),
+        // "/images": (context) => ImageScreen(),
+      },
+      onGenerateRoute: (settings) {
+        if (settings.name == "/images") {
+          final url = settings.arguments as String;
+
+          return MaterialPageRoute(builder: (context) => ImageScreen(url));
+        }
+
+        return null;
       },
     );
   }

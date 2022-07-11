@@ -5,14 +5,14 @@ import 'package:provider/provider.dart';
 
 import '../models/serverData.dart';
 
-class LoginForm extends StatefulWidget {
-  const LoginForm({super.key});
+class LoginWidget extends StatefulWidget {
+  const LoginWidget({super.key});
 
   @override
-  State<StatefulWidget> createState() => LoginFormState();
+  State<StatefulWidget> createState() => LoginWidgetState();
 }
 
-class LoginFormState extends State<LoginForm> {
+class LoginWidgetState extends State<LoginWidget> {
   final _formKey = GlobalKey<FormState>();
 
   String? _host;
@@ -88,7 +88,7 @@ class LoginFormState extends State<LoginForm> {
             Consumer<ServerData>(
               builder: (context, data, widget) {
                 return Container(
-                  margin: EdgeInsets.only(top: 10),
+                  margin: EdgeInsets.only(top: 8.0),
                   child: Row(
                     children: [
                       Expanded(

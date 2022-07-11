@@ -65,4 +65,7 @@ class ServerData extends ChangeNotifier {
 
     notifyListeners();
   }
+
+  Future<List<String>> getFolderContent(String path) =>
+      _client.getFolderContent(path);
 }

@@ -12,7 +12,7 @@ class OverviewScreen extends StatelessWidget {
         child: Column(
           children: [
             const Align(
-              alignment: Alignment.topLeft,
+              alignment: Alignment.centerLeft,
               child: Text(
                 "Informationen bearbeiten",
                 textScaleFactor: 2.0,

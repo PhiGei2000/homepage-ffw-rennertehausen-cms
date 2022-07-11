@@ -55,94 +55,102 @@ class AlarmDetailState extends State<AlarmDetail> with RestorationMixin {
 
         return Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Flexible(
-                flex: 3,
-                child: Padding(
-                  padding: EdgeInsets.only(right: 8.0),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+          child: Padding(
+            padding: EdgeInsets.only(right: 8.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  createTextField(
+                    "Id",
+                    alarm.id,
+                    validator: (id) {
+                      if (!RegExp(r"^\d{4}_\d{2}$").hasMatch(id!)) {
+                        return "Falsches Format für die Einsatz ID";
+                      }
+
+                      return null;
+                    },
+                    onSaved: (id) => _currentAlarm.id = id!,
+                  ),
+                  createTextField(
+                    "Titel",
+                    alarm.title,
+                    validator: (title) {
+                      if (!RegExp(r"Einsatz \d{2}\/\d{4}").hasMatch(title!)) {
+                        return "Flasches Format";
+                      }
+
+                      return null;
+                    },
+                    onSaved: (title) => _currentAlarm.title = title!,
+                  ),
+                  createTextField(
+                    "Einsatzstichwort",
+                    alarm.word,
+                    validator: notEmptyValidator,
+                    onSaved: (word) => _currentAlarm.word = word!,
+                  ),
+                  createTextField(
+                    "Einsatzort",
+                    alarm.location,
+                    validator: notEmptyValidator,
+                    onSaved: (location) => _currentAlarm.location = location!,
+                  ),
+                  createTextField(
+                      "Einsatzzeit", _dateFormatter.format(alarm.time),
+                      onTap: () {
+                        FocusScope.of(context).requestFocus(new FocusNode());
+                        _restorableDatePickerRouteFuture.present();
+                      },
+                      validator: notEmptyValidator,
+                      onSaved: (timeString) {
+                        final time = _dateFormatter.parseStrict(timeString!);
+                        _currentAlarm.time = time;
+                      }),
+                  createTextField(
+                    "Fahrzeuge",
+                    alarm.vehicles,
+                    onSaved: (vehicles) => _currentAlarm.vehicles = vehicles,
+                  ),
+                  createTextField(
+                    "Einsatzkräfte",
+                    alarm.participants?.toString(),
+                    onSaved: (participants) => _currentAlarm.participants =
+                        participants != null && !participants.isEmpty
+                            ? int.parse(participants)
+                            : null,
+                  ),
+                  createTextField(
+                    "Beschreibung",
+                    alarm.description,
+                    maxLines: null,
+                    validator: notEmptyValidator,
+                    onSaved: (description) =>
+                        _currentAlarm.description = description!,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Flex(
+                      direction: Axis.horizontal,
                       children: [
-                        createTextField(
-                          "Id",
-                          alarm.id,
-                          validator: (id) {
-                            if (!RegExp(r"^\d{4}_\d{2}$").hasMatch(id!)) {
-                              return "Falsches Format für die Einsatz ID";
-                            }
-
-                            return null;
-                          },
-                          onSaved: (id) => _currentAlarm.id = id!,
+                        Flexible(
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: TextButton(
+                              onPressed: () {
+                                Navigator.pushNamed(context, "/images",
+                                    arguments: "/img/alarms/${alarm.id}");
+                              },
+                              child: const Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Text("Bilder hochladen"),
+                              ),
+                            ),
+                          ),
                         ),
-                        createTextField(
-                          "Titel",
-                          alarm.title,
-                          validator: (title) {
-                            if (!RegExp(r"Einsatz \d{2}\/\d{4}")
-                                .hasMatch(title!)) {
-                              return "Flasches Format";
-                            }
-
-                            return null;
-                          },
-                          onSaved: (title) => _currentAlarm.title = title!,
-                        ),
-                        createTextField(
-                          "Einsatzstichwort",
-                          alarm.word,
-                          validator: notEmptyValidator,
-                          onSaved: (word) => _currentAlarm.word = word!,
-                        ),
-                        createTextField(
-                          "Einsatzort",
-                          alarm.location,
-                          validator: notEmptyValidator,
-                          onSaved: (location) =>
-                              _currentAlarm.location = location!,
-                        ),
-                        createTextField(
-                            "Einsatzzeit", _dateFormatter.format(alarm.time),
-                            onTap: () {
-                              FocusScope.of(context)
-                                  .requestFocus(new FocusNode());
-                              _restorableDatePickerRouteFuture.present();
-                            },
-                            validator: notEmptyValidator,
-                            onSaved: (timeString) {
-                              final time =
-                                  _dateFormatter.parseStrict(timeString!);
-                              _currentAlarm.time = time;
-                            }),
-                        createTextField(
-                          "Fahrzeuge",
-                          alarm.vehicles,
-                          onSaved: (vehicles) =>
-                              _currentAlarm.vehicles = vehicles,
-                        ),
-                        createTextField(
-                          "Einsatzkräfte",
-                          alarm.participants?.toString(),
-                          onSaved: (participants) =>
-                              _currentAlarm.participants =
-                                  participants != null && !participants.isEmpty
-                                      ? int.parse(participants)
-                                      : null,
-                        ),
-                        createTextField(
-                          "Beschreibung",
-                          alarm.description,
-                          maxLines: null,
-                          validator: notEmptyValidator,
-                          onSaved: (description) =>
-                              _currentAlarm.description = description!,
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        Flexible(
                           child: Align(
                             alignment: Alignment.centerRight,
                             child: TextButton(
@@ -162,20 +170,9 @@ class AlarmDetailState extends State<AlarmDetail> with RestorationMixin {
                       ],
                     ),
                   ),
-                ),
+                ],
               ),
-              Flexible(
-                flex: 2,
-                child: Column(children: [
-                  Padding(
-                      padding: EdgeInsets.all(10.0),
-                      child: alarm.image != null
-                          ? Image.network(
-                              "https://feuerwehr-rennertehausen.de${alarm.image!}")
-                          : null),
-                ]),
-              ),
-            ],
+            ),
           ),
         );
       },

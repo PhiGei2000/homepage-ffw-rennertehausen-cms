@@ -35,8 +35,6 @@ class Client {
     } catch (error) {}
   }
 
-  Future<List<SftpName>> listFiles(String path) => sftp!.listdir('./www/$path');
-
   Future<Uint8List> getFileContent(String path) async {
     final file = await sftp!.open('./www/$path');
     return await file.readBytes();
@@ -56,5 +54,16 @@ class Client {
     var alarmsData = jsonEncode(alarms);
 
     log(alarmsData);
+  }
+
+  Future<List<String>> getFolderContent(String path) async {
+    try {
+      final sftpFiles = await sftp!.listdir("./www/$path");
+
+      return List.generate(
+          sftpFiles.length, (index) => sftpFiles[index].filename);
+    } on SftpStatusError {
+      return [];
+    }
   }
 }
