@@ -3,15 +3,16 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:homepage_ffw_rennertehausen_cms/models/album_identifier.dart';
 import 'package:provider/provider.dart';
 
 import '../models/image_source.dart';
 import '../models/serverData.dart';
 
 class ImageScreen extends StatefulWidget {
-  final String url;
+  final AlbumIdentifier identifier;
 
-  const ImageScreen(this.url, {super.key});
+  const ImageScreen(this.identifier, {super.key});
 
   @override
   State<StatefulWidget> createState() => ImageScreenState();
@@ -35,9 +36,9 @@ class ImageScreenState extends State<ImageScreen> {
               final image = _images[index];
 
               switch (image.type) {
-                case ImageType.file:
+                case ImageSourceType.file:
                   return Image.file(File(image.src));
-                case ImageType.network:
+                case ImageSourceType.network:
                   return Image.network(
                       "https://feuerwehr-rennertehausen.de${widget.url}/${image.src}");
               }
@@ -62,9 +63,9 @@ class ImageScreenState extends State<ImageScreen> {
 
   void getImages() async {
     final images = (await Provider.of<ServerData>(context, listen: false)
-            .getFolderContent(widget.url))
+            .getFolderContent(widget.identifier.getImageFolderPath()))
         .where((element) => element.endsWith(".png"))
-        .map((e) => ImageSource(e, ImageType.network))
+        .map((e) => ImageSource(e, ImageSourceType.network))
         .toList();
 
     setState(() {
@@ -81,7 +82,11 @@ class ImageScreenState extends State<ImageScreen> {
     if (result != null) {
       setState(() {
         for (final file in result.files) {
-          _images.add(ImageSource(file.path!, ImageType.file));
+          final source = ImageSource(file.path!, ImageSourceType.file);
+
+          _images.add(source);
+          Provider.of<ServerData>(context)
+              .addImage(source, widget.identifier.type, widget.identifier.id);
         }
       });
     }

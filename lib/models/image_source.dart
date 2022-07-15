@@ -1,9 +1,9 @@
-enum ImageType { file, network }
+enum ImageSourceType { file, network }
 
 class ImageSource {
   String src;
 
-  ImageType type;
+  ImageSourceType type;
 
   ImageSource(this.src, this.type);
 }

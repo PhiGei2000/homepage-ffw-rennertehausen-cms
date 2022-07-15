@@ -36,29 +36,31 @@ class Client {
   }
 
   Future<Uint8List> getFileContent(String path) async {
-    final file = await sftp!.open('./www/$path');
+    final file = await sftp!.open('./www$path');
     return await file.readBytes();
   }
 
-  Future<void> downloadServerData(ServerData data) async {
-    var alarmsData = await getFileContent('data/alarms.json');
+  Future<void> uploadFile(String path, String dest) async {
+    final file = await sftp!.open('./www$dest',
+        mode: SftpFileOpenMode.create |
+            SftpFileOpenMode.truncate |
+            SftpFileOpenMode.write);
 
-    final alarms = List.from(jsonDecode(utf8.decode(alarmsData)));
-
-    for (final alarm in alarms) {
-      data.addAlarm(Alarm.fromJson(alarm));
-    }
+    return file.write(File(path).openRead().cast());
   }
 
-  Future<void> uploadAlarms(List<Alarm> alarms) async {
-    var alarmsData = jsonEncode(alarms);
+  Future<void> uploadFileContent(Uint8List data, String dest) async {
+    final file = await sftp!.open('./www$dest',
+        mode: SftpFileOpenMode.create |
+            SftpFileOpenMode.truncate |
+            SftpFileOpenMode.write);
 
-    log(alarmsData);
+    return file.writeBytes(data);
   }
 
   Future<List<String>> getFolderContent(String path) async {
     try {
-      final sftpFiles = await sftp!.listdir("./www/$path");
+      final sftpFiles = await sftp!.listdir("./www$path");
 
       return List.generate(
           sftpFiles.length, (index) => sftpFiles[index].filename);
