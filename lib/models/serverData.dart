@@ -44,7 +44,7 @@ class ServerData extends ChangeNotifier {
   }
 
   // alarms
-  final Map<String, Alarm> _alarms = <String, Alarm>{};
+  Map<String, Alarm> _alarms = <String, Alarm>{};
   bool _alarmsChanged = false;
   List<String> _changedAlarms = [];
 
@@ -65,6 +65,14 @@ class ServerData extends ChangeNotifier {
     }
 
     _alarms[id] = alarm;
+
+    // sort alarms
+    final alarmsList = _alarms.entries.toList();
+    alarmsList.sort(
+      (a, b) => a.key.compareTo(b.key),
+    );
+
+    _alarms = Map.fromEntries(alarmsList.reversed);
 
     notifyListeners();
   }
@@ -87,6 +95,39 @@ class ServerData extends ChangeNotifier {
     notifyListeners();
   }
 
+  Alarm createAlarm() {
+    // get new alarm id
+    // final idPattern = RegExp(r'\d{4}_\d{2}');
+
+    final year = DateTime.now().year;
+    var id = 1;
+    for (final alarmId in _alarms.keys) {
+      final currentYear = int.parse(alarmId.substring(0, 4));
+
+      if (year == currentYear) {
+        final currentId = int.parse(alarmId.substring(5));
+        if (currentId > id) {
+          id = currentId + 1;
+        }
+      }
+    }
+
+    final alarm = Alarm(
+        "${year}_${id.toString().padLeft(2, "0")}",
+        "",
+        DateTime.now(),
+        "Einsatz ${id.toString().padLeft(2, "0")}/$year",
+        "",
+        "",
+        0,
+        "",
+        "");
+
+    addAlarm(alarm);
+
+    return alarm;
+  }
+
   // images
   final Map<AlbumIdentifier, List<ImageSource>> _imagesToUpload = {};
 
@@ -104,22 +145,27 @@ class ServerData extends ChangeNotifier {
 
   /// upload images by destination directory
   void uploadImages() async {
-    while (_imagesToUpload.isNotEmpty) {
-      final identifier = _imagesToUpload.keys.first;
+    if (_imagesToUpload.isNotEmpty) {
+      while (_imagesToUpload.isNotEmpty) {
+        final identifier = _imagesToUpload.keys.first;
 
-      final imagesToUpload = _imagesToUpload.remove(identifier);
+        final imagesToUpload = _imagesToUpload.remove(identifier);
 
-      final path = identifier.getImageFolderPath();
-      final destFiles = await _client.getFolderContent(path);
+        final path = identifier.getImageFolderPath();
+        final destFiles = await _client.getFolderContent(path);
 
-      int idCounter = destFiles.length;
+        int idCounter = destFiles.length;
 
-      for (var image in imagesToUpload!) {
-        final destFilename = '$path/${identifier.id}_$idCounter.png';
-        idCounter++;
+        for (var image in imagesToUpload!) {
+          final destFilename =
+              '$path/${identifier.id}_${idCounter.toString().padLeft(2, "0")}.png';
+          idCounter++;
 
-        await _client.uploadFile(image.src, destFilename);
+          await _client.uploadFile(image.src, destFilename);
+        }
       }
+
+      await _client.executeCommand("bash createImageLists.sh");
     }
   }
 

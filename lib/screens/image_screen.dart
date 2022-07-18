@@ -23,25 +23,57 @@ class ImageScreenState extends State<ImageScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text("Bilder auswählen"),
+          title: const Text("Bilder hochladen"),
+          actions: [
+            IconButton(
+                onPressed: () {
+                  Provider.of<ServerData>(context, listen: false)
+                      .uploadImages();
+                },
+                icon: Icon(Icons.upload)),
+          ],
         ),
         body: Padding(
           padding: const EdgeInsets.all(8.0),
           child: GridView.builder(
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 5,
-              mainAxisSpacing: 16.0,
             ),
             itemBuilder: (context, index) {
               final image = _images[index];
 
-              switch (image.type) {
-                case ImageSourceType.file:
-                  return Image.file(File(image.src));
-                case ImageSourceType.network:
-                  return Image.network(
-                      "https://feuerwehr-rennertehausen.de${widget.url}/${image.src}");
-              }
+              return Padding(
+                  padding: EdgeInsets.all(8),
+                  child: Card(
+                      child: Stack(
+                    alignment: Alignment.topCenter,
+                    children: [
+                      getImage(image),
+                      Align(
+                        alignment: Alignment.bottomCenter,
+                        child: Text(image.src),
+                      ),
+                      Align(
+                        alignment: Alignment.topLeft,
+                        child: Row(
+                          children: [
+                            IconButton(
+                              onPressed: () {},
+                              icon: const Icon(Icons.arrow_left),
+                            ),
+                            IconButton(
+                              onPressed: () {},
+                              icon: const Icon(Icons.delete),
+                            ),
+                            IconButton(
+                              onPressed: () {},
+                              icon: const Icon(Icons.arrow_right),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  )));
             },
             itemCount: _images.length,
           ),
@@ -50,6 +82,16 @@ class ImageScreenState extends State<ImageScreen> {
           onPressed: addImages,
           child: const Icon(Icons.add),
         ));
+  }
+
+  Image getImage(ImageSource source) {
+    switch (source.type) {
+      case ImageSourceType.file:
+        return Image.file(File(source.src));
+      case ImageSourceType.network:
+        return Image.network(
+            "https://feuerwehr-rennertehausen.de/${widget.identifier.getImageFolderPath()}/${source.src}");
+    }
   }
 
   List<ImageSource> _images = [];
@@ -85,7 +127,7 @@ class ImageScreenState extends State<ImageScreen> {
           final source = ImageSource(file.path!, ImageSourceType.file);
 
           _images.add(source);
-          Provider.of<ServerData>(context)
+          Provider.of<ServerData>(context, listen: false)
               .addImage(source, widget.identifier.type, widget.identifier.id);
         }
       });

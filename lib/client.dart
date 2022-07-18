@@ -40,7 +40,31 @@ class Client {
     return await file.readBytes();
   }
 
+  Future<void> createDir(String path, [bool recurse = false]) async {
+    final parts = path.split('/');
+    final dir = parts.sublist(0, parts.length - 1).join('/');
+
+    try {
+      final list = (await sftp!.listdir("./www$dir")).map((e) => e.filename);
+      if (!list.contains(parts[parts.length - 1])) {
+        sftp!.mkdir("./www$path");
+      }
+    } on SftpStatusError catch (e) {
+      if (recurse) {
+        await createDir(dir);
+        sftp!.mkdir(path);
+      } else {
+        throw e;
+      }
+    }
+  }
+
   Future<void> uploadFile(String path, String dest) async {
+// create directory
+    final parts = dest.split('/');
+    final dir = parts.sublist(0, parts.length - 1).join('/');
+    await createDir(dir);
+
     final file = await sftp!.open('./www$dest',
         mode: SftpFileOpenMode.create |
             SftpFileOpenMode.truncate |
@@ -67,5 +91,9 @@ class Client {
     } on SftpStatusError {
       return [];
     }
+  }
+
+  Future<SSHSession> executeCommand(String command, [String workdir = "/"]) {
+    return client!.execute(command);
   }
 }

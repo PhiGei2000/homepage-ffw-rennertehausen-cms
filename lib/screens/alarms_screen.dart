@@ -33,7 +33,8 @@ class AlarmsScreen extends StatelessWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-          onPressed: addButtonPressed, child: const Icon(Icons.add)),
+          onPressed: () => addButtonPressed(context),
+          child: const Icon(Icons.add)),
     );
   }
 
@@ -84,7 +85,13 @@ class AlarmsScreen extends StatelessWidget {
     }
   }
 
-  void addButtonPressed() {}
+  void addButtonPressed(BuildContext context) {
+    // create new alarm
+    final newAlarm =
+        Provider.of<ServerData>(context, listen: false).createAlarm();
+
+    Navigator.pushNamed(context, '/alarmDetail', arguments: newAlarm.id);
+  }
 
   void syncButtonPressed(BuildContext context) async {
     Provider.of<ServerData>(context, listen: false).syncAlarms();

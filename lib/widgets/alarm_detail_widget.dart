@@ -99,16 +99,18 @@ class AlarmDetailState extends State<AlarmDetail> with RestorationMixin {
                     onSaved: (location) => _currentAlarm.location = location!,
                   ),
                   createTextField(
-                      "Einsatzzeit", _dateFormatter.format(alarm.time),
-                      onTap: () {
-                        FocusScope.of(context).requestFocus(new FocusNode());
-                        _restorableDatePickerRouteFuture.present();
-                      },
-                      validator: notEmptyValidator,
-                      onSaved: (timeString) {
-                        final time = _dateFormatter.parseStrict(timeString!);
-                        _currentAlarm.time = time;
-                      }),
+                    "Einsatzzeit",
+                    _dateFormatter.format(alarm.time),
+                    onTap: () {
+                      FocusScope.of(context).requestFocus(new FocusNode());
+                      _restorableDatePickerRouteFuture.present();
+                    },
+                    validator: notEmptyValidator,
+                    onSaved: (timeString) {
+                      final time = _dateFormatter.parseStrict(timeString!);
+                      _currentAlarm.time = time;
+                    },
+                  ),
                   createTextField(
                     "Fahrzeuge",
                     alarm.vehicles,

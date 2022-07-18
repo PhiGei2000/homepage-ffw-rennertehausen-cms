@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:homepage_ffw_rennertehausen_cms/models/album_identifier.dart';
 
 import 'package:homepage_ffw_rennertehausen_cms/models/serverData.dart';
 import 'package:homepage_ffw_rennertehausen_cms/screens/alarm_detail_screen.dart';
@@ -33,14 +34,16 @@ class FFWRennertehausenCMSApp extends StatelessWidget {
         "/": (context) => OverviewScreen(),
         "/login": (context) => LoginScreen(),
         "/alarms": (context) => AlarmsScreen("alarms_screen"),
-        "/alarmDetail": (context) => AlarmDetailScreen(),
+        "/alarmDetail": (context) => const AlarmDetailScreen(),
         // "/images": (context) => ImageScreen(),
       },
       onGenerateRoute: (settings) {
         if (settings.name == "/images") {
-          final url = settings.arguments as String;
+          final path = settings.arguments as String;
+          final identifier = AlbumIdentifier.fromPath(path);
 
-          return MaterialPageRoute(builder: (context) => ImageScreen(url));
+          return MaterialPageRoute(
+              builder: (context) => ImageScreen(identifier));
         }
 
         return null;
